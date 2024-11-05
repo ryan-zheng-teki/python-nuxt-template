@@ -20,3 +20,13 @@ class UpdateUserInput:
     username: Optional[str] = None
     email: Optional[str] = None
     full_name: Optional[str] = None
+
+@strawberry.input
+class LoginInput:
+    username: str
+    password: str
+
+@strawberry.type
+class LoginPayload:
+    token: str
+    user: User

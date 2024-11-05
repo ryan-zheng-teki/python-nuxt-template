@@ -9,6 +9,7 @@ interface UserState {
   users: User[];
   loading: boolean;
   error: string | null;
+  authToken: string | null;
 }
 
 export const useUserStore = defineStore('user', {
@@ -17,8 +18,23 @@ export const useUserStore = defineStore('user', {
     users: [],
     loading: false,
     error: null,
+    authToken: null,
   }),
   actions: {
+    setAuthToken(token: string) {
+      this.authToken = token
+      localStorage.setItem('authToken', token)
+    },
+    clearAuthToken() {
+      this.authToken = null
+      localStorage.removeItem('authToken')
+    },
+    logout() {
+      this.clearAuthToken()
+      this.currentUser = null
+      // Optionally, redirect to login page
+    },
+    // ... existing actions like createUser, updateUser, etc.
     async createUser(input: { username: string; email: string; fullName: string }) {
       this.loading = true
       this.error = null
@@ -26,7 +42,6 @@ export const useUserStore = defineStore('user', {
       try {
         const result = await createUserMutation({ input })
         if (result.data?.createUser) {
-          // Create a new array to ensure mutability
           this.users = [...this.users, result.data.createUser]
         }
       } catch (error) {
@@ -36,90 +51,53 @@ export const useUserStore = defineStore('user', {
         this.loading = false
       }
     },
-    async updateUser(input: { id: number; username?: string; email?: string; fullName?: string }) {
+    // Add login action
+    async login(username: string, password: string): Promise<void> {
       this.loading = true
       this.error = null
-      const { mutate: updateUserMutation } = useMutation(UpdateUser)
       try {
-        const result = await updateUserMutation({ input })
-        if (result.data?.updateUser) {
-          // Create a new array with the updated user
-          this.users = this.users.map(u => u.id === input.id ? result.data.updateUser : u)
-          
-          if (this.currentUser?.id === input.id) {
-            // Ensure currentUser is also a new object
-            this.currentUser = { ...result.data.updateUser }
-          }
+        const response = await fetch('http://localhost:8000/graphql', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // Include authentication headers if necessary
+          },
+          body: JSON.stringify({
+            query: `
+              mutation Login($username: String!, $password: String!) {
+                login(username: $username, password: $password) {
+                  token
+                  user {
+                    id
+                    username
+                    email
+                    fullName
+                  }
+                }
+              }
+            `,
+            variables: { username, password },
+          }),
+        })
+
+        const result = await response.json()
+
+        if (result.data?.login) {
+          this.setAuthToken(result.data.login.token)
+          this.currentUser = result.data.login.user
+        } else if (result.errors) {
+          this.error = result.errors[0].message
         }
       } catch (error) {
-        this.error = 'Failed to update user'
-        console.error('Error updating user:', error)
+        this.error = 'Failed to login'
+        console.error('Error logging in:', error)
       } finally {
         this.loading = false
       }
-    },
-    async deleteUser(userId: number) {
-      this.loading = true
-      this.error = null
-      const { mutate: deleteUserMutation } = useMutation(DeleteUser)
-      try {
-        const result = await deleteUserMutation({ userId })
-        if (result.data?.deleteUser) {
-          // Create a new array without the deleted user
-          this.users = this.users.filter(u => u.id !== userId)
-          
-          if (this.currentUser?.id === userId) {
-            this.currentUser = null
-          }
-        }
-      } catch (error) {
-        this.error = 'Failed to delete user'
-        console.error('Error deleting user:', error)
-      } finally {
-        this.loading = false
-      }
-    },
-    async fetchUser(userId: number) {
-      this.loading = true
-      this.error = null
-      const { onResult, onError } = useQuery(GetUser, { userId })
-      
-      onResult((result) => {
-        if (result.data?.user) {
-          // Ensure currentUser is a new object
-          this.currentUser = { ...result.data.user }
-        }
-        this.loading = false
-      })
-      
-      onError((error) => {
-        this.error = 'Failed to fetch user'
-        console.error('Error fetching user:', error)
-        this.loading = false
-      })
-    },
-    async fetchAllUsers() {
-      this.loading = true
-      this.error = null
-      const { onResult, onError } = useQuery(GetAllUsers)
-      
-      onResult((result) => {
-        if (result.data?.users) {
-          // Create a new array to ensure mutability
-          this.users = [...result.data.users]
-        }
-        this.loading = false
-      })
-      
-      onError((error) => {
-        this.error = 'Failed to fetch users'
-        console.error('Error fetching users:', error)
-        this.loading = false
-      })
     },
   },
   getters: {
-    isAuthenticated: (state) => !!state.currentUser,
+    isAuthenticated: (state) => !!state.authToken,
     userById: (state) => (id: number) => state.users.find(u => u.id === id),
   },
 })
