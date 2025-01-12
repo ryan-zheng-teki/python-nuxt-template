@@ -8,25 +8,21 @@ from fastapi.responses import FileResponse
 import os
 import jwt  # PyJWT library
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 
-# Import your GraphQL schema
+# Load environment variables from .env file
+load_dotenv()
+
+# Import your GraphQL schema and settings
 from .graphql.schema import schema
-
-# Secret key for JWT
-SECRET_KEY = "your_secret_key"  # Replace with your actual secret key
-ALGORITHM = "HS256"
+from .config.settings import settings
 
 app = FastAPI()
 
 # Configure CORS
-origins = [
-    "http://localhost:3000",
-    # Add other origins if required
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,14 +31,12 @@ app.add_middleware(
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# Mock user authentication
 def verify_token(token: str):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         user_id: int = payload.get("sub")
         if user_id is None:
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-        # Fetch user from database if necessary
         return {"user_id": user_id, "is_authenticated": True}
     except jwt.PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
@@ -86,38 +80,36 @@ async def download_library(request: Request):
     if not user or not user.get("is_authenticated", False):
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    library_path = os.path.join("libraries", "my_library", "libmylibrary.so")
-    
-    if not os.path.exists(library_path):
+    if not os.path.exists(settings.LIBRARY_PATH):
         raise HTTPException(status_code=404, detail="Library not found")
     
-    return FileResponse(path=library_path, filename="libmylibrary.so", media_type='application/octet-stream')
+    return FileResponse(
+        path=settings.LIBRARY_PATH,
+        filename="libmylibrary.so",
+        media_type='application/octet-stream'
+    )
 
-# Optional: Endpoint to obtain JWT token (Login)
 @app.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    # Implement your user authentication logic here
-    # For example, verify username and password from the database
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     
-    access_token_expires = timedelta(minutes=30)
+    access_token_expires = timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user["id"]}, expires_delta=access_token_expires
+        data={"sub": user["id"]},
+        expires_delta=access_token_expires
     )
     
     return {"access_token": access_token, "token_type": "bearer"}
 
-# Helper functions
 def authenticate_user(username: str, password: str):
     # Replace with your actual user authentication logic
-    # Return user object if authentication is successful
     return {"id": 1, "username": username}
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=15))
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
     return encoded_jwt

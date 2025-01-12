@@ -101,8 +101,6 @@ const signUp = async () => {
   }
 }
 
-// Fetch all users when the component is mounted
-userStore.fetchAllUsers()
 </script>
 
 <style scoped>

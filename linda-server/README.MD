@@ -16,7 +16,7 @@ Run the following command to start a PostgreSQL container:
 
 ```
 docker run -d \
-    --name linda-postgres \
+    --name linda-server \
     -e POSTGRES_DB=postgres \
     -e POSTGRES_USER=postgres \
     -e POSTGRES_PASSWORD=mysecretpassword \

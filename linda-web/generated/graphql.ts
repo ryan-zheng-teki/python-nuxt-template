@@ -24,10 +24,22 @@ export type CreateUserInput = {
   username: Scalars['String']['input'];
 };
 
+export type LoginInput = {
+  password: Scalars['String']['input'];
+  username: Scalars['String']['input'];
+};
+
+export type LoginPayload = {
+  __typename?: 'LoginPayload';
+  token: Scalars['String']['output'];
+  user: User;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createUser: User;
   deleteUser: Scalars['Boolean']['output'];
+  login: LoginPayload;
   updateUser: User;
 };
 
@@ -42,12 +54,18 @@ export type MutationDeleteUserArgs = {
 };
 
 
+export type MutationLoginArgs = {
+  input: LoginInput;
+};
+
+
 export type MutationUpdateUserArgs = {
   input: UpdateUserInput;
 };
 
 export type Query = {
   __typename?: 'Query';
+  downloadLibraryUrl: Scalars['String']['output'];
   user: User;
   users: Array<User>;
 };
