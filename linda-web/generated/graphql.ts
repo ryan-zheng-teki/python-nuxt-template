@@ -18,9 +18,17 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type ApiKey = {
+  __typename?: 'ApiKey';
+  id: Scalars['Int']['output'];
+  keyValue: Scalars['String']['output'];
+  userId: Scalars['Int']['output'];
+};
+
 export type CreateUserInput = {
   email: Scalars['String']['input'];
   fullName: Scalars['String']['input'];
+  password: Scalars['String']['input'];
   username: Scalars['String']['input'];
 };
 
@@ -37,10 +45,25 @@ export type LoginPayload = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  buySubscription: Scalars['Boolean']['output'];
+  cancelSubscription: Scalars['Boolean']['output'];
   createUser: User;
   deleteUser: Scalars['Boolean']['output'];
+  generateApiKey: ApiKey;
   login: LoginPayload;
   updateUser: User;
+};
+
+
+export type MutationBuySubscriptionArgs = {
+  durationDays: Scalars['Int']['input'];
+  planType: Scalars['String']['input'];
+  userId: Scalars['Int']['input'];
+};
+
+
+export type MutationCancelSubscriptionArgs = {
+  subscriptionId: Scalars['Int']['input'];
 };
 
 
@@ -50,6 +73,11 @@ export type MutationCreateUserArgs = {
 
 
 export type MutationDeleteUserArgs = {
+  userId: Scalars['Int']['input'];
+};
+
+
+export type MutationGenerateApiKeyArgs = {
   userId: Scalars['Int']['input'];
 };
 
@@ -79,6 +107,7 @@ export type UpdateUserInput = {
   email?: InputMaybe<Scalars['String']['input']>;
   fullName?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['Int']['input'];
+  password?: InputMaybe<Scalars['String']['input']>;
   username?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -89,6 +118,29 @@ export type User = {
   id: Scalars['Int']['output'];
   username: Scalars['String']['output'];
 };
+
+export type GenerateApiKeyMutationVariables = Exact<{
+  userId: Scalars['Int']['input'];
+}>;
+
+
+export type GenerateApiKeyMutation = { __typename?: 'Mutation', generateApiKey: { __typename?: 'ApiKey', id: number, userId: number, keyValue: string } };
+
+export type BuySubscriptionMutationVariables = Exact<{
+  userId: Scalars['Int']['input'];
+  planType: Scalars['String']['input'];
+  durationDays: Scalars['Int']['input'];
+}>;
+
+
+export type BuySubscriptionMutation = { __typename?: 'Mutation', buySubscription: boolean };
+
+export type CancelSubscriptionMutationVariables = Exact<{
+  subscriptionId: Scalars['Int']['input'];
+}>;
+
+
+export type CancelSubscriptionMutation = { __typename?: 'Mutation', cancelSubscription: boolean };
 
 export type CreateUserMutationVariables = Exact<{
   input: CreateUserInput;
@@ -111,6 +163,13 @@ export type DeleteUserMutationVariables = Exact<{
 
 export type DeleteUserMutation = { __typename?: 'Mutation', deleteUser: boolean };
 
+export type LoginMutationVariables = Exact<{
+  input: LoginInput;
+}>;
+
+
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginPayload', token: string, user: { __typename?: 'User', id: number, username: string, email: string, fullName: string } } };
+
 export type GetUserQueryVariables = Exact<{
   userId: Scalars['Int']['input'];
 }>;
@@ -124,6 +183,97 @@ export type GetAllUsersQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetAllUsersQuery = { __typename?: 'Query', users: Array<{ __typename?: 'User', id: number, username: string, email: string, fullName: string }> };
 
 
+export const GenerateApiKeyDocument = gql`
+    mutation GenerateApiKey($userId: Int!) {
+  generateApiKey(userId: $userId) {
+    id
+    userId
+    keyValue
+  }
+}
+    `;
+
+/**
+ * __useGenerateApiKeyMutation__
+ *
+ * To run a mutation, you first call `useGenerateApiKeyMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateApiKeyMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useGenerateApiKeyMutation({
+ *   variables: {
+ *     userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useGenerateApiKeyMutation(options: VueApolloComposable.UseMutationOptions<GenerateApiKeyMutation, GenerateApiKeyMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<GenerateApiKeyMutation, GenerateApiKeyMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<GenerateApiKeyMutation, GenerateApiKeyMutationVariables>(GenerateApiKeyDocument, options);
+}
+export type GenerateApiKeyMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<GenerateApiKeyMutation, GenerateApiKeyMutationVariables>;
+export const BuySubscriptionDocument = gql`
+    mutation BuySubscription($userId: Int!, $planType: String!, $durationDays: Int!) {
+  buySubscription(
+    userId: $userId
+    planType: $planType
+    durationDays: $durationDays
+  )
+}
+    `;
+
+/**
+ * __useBuySubscriptionMutation__
+ *
+ * To run a mutation, you first call `useBuySubscriptionMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useBuySubscriptionMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useBuySubscriptionMutation({
+ *   variables: {
+ *     userId: // value for 'userId'
+ *     planType: // value for 'planType'
+ *     durationDays: // value for 'durationDays'
+ *   },
+ * });
+ */
+export function useBuySubscriptionMutation(options: VueApolloComposable.UseMutationOptions<BuySubscriptionMutation, BuySubscriptionMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<BuySubscriptionMutation, BuySubscriptionMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<BuySubscriptionMutation, BuySubscriptionMutationVariables>(BuySubscriptionDocument, options);
+}
+export type BuySubscriptionMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<BuySubscriptionMutation, BuySubscriptionMutationVariables>;
+export const CancelSubscriptionDocument = gql`
+    mutation CancelSubscription($subscriptionId: Int!) {
+  cancelSubscription(subscriptionId: $subscriptionId)
+}
+    `;
+
+/**
+ * __useCancelSubscriptionMutation__
+ *
+ * To run a mutation, you first call `useCancelSubscriptionMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useCancelSubscriptionMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useCancelSubscriptionMutation({
+ *   variables: {
+ *     subscriptionId: // value for 'subscriptionId'
+ *   },
+ * });
+ */
+export function useCancelSubscriptionMutation(options: VueApolloComposable.UseMutationOptions<CancelSubscriptionMutation, CancelSubscriptionMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<CancelSubscriptionMutation, CancelSubscriptionMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<CancelSubscriptionMutation, CancelSubscriptionMutationVariables>(CancelSubscriptionDocument, options);
+}
+export type CancelSubscriptionMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<CancelSubscriptionMutation, CancelSubscriptionMutationVariables>;
 export const CreateUserDocument = gql`
     mutation CreateUser($input: CreateUserInput!) {
   createUser(input: $input) {
@@ -215,6 +365,41 @@ export function useDeleteUserMutation(options: VueApolloComposable.UseMutationOp
   return VueApolloComposable.useMutation<DeleteUserMutation, DeleteUserMutationVariables>(DeleteUserDocument, options);
 }
 export type DeleteUserMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<DeleteUserMutation, DeleteUserMutationVariables>;
+export const LoginDocument = gql`
+    mutation Login($input: LoginInput!) {
+  login(input: $input) {
+    token
+    user {
+      id
+      username
+      email
+      fullName
+    }
+  }
+}
+    `;
+
+/**
+ * __useLoginMutation__
+ *
+ * To run a mutation, you first call `useLoginMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useLoginMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useLoginMutation({
+ *   variables: {
+ *     input: // value for 'input'
+ *   },
+ * });
+ */
+export function useLoginMutation(options: VueApolloComposable.UseMutationOptions<LoginMutation, LoginMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<LoginMutation, LoginMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, options);
+}
+export type LoginMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<LoginMutation, LoginMutationVariables>;
 export const GetUserDocument = gql`
     query GetUser($userId: Int!) {
   user(userId: $userId) {

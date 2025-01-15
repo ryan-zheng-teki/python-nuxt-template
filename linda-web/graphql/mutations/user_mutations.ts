@@ -27,3 +27,17 @@ export const DeleteUser = gql`
     deleteUser(userId: $userId)
   }
 `;
+
+export const Login = gql`
+  mutation Login($input: LoginInput!) {
+    login(input: $input) {
+      token
+      user {
+        id
+        username
+        email
+        fullName
+      }
+    }
+  }
+`;

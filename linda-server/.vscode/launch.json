@@ -2,16 +2,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: GraphQL Server",
+            "name": "FastAPI",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/autobyteus_server/app.py",
+            "module": "uvicorn",
             "args": [
-                "--mode", "graphqlserver",
-                "--host", "127.0.0.1",
-                "--port", "8000"
+                "linda_server.app:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8002"
             ],
-            "console": "integratedTerminal"
-        }
+            "jinja": true,
+            "justMyCode": false
+        },
     ]
 }

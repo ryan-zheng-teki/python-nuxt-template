@@ -3,7 +3,7 @@ import { defineNuxtConfig } from 'nuxt/config'
 export default defineNuxtConfig({
   // Explicitly set SSR mode
   ssr: false,
-  
+
   modules: ['@nuxtjs/apollo', '@pinia/nuxt'],
 
   // Configure nitro with development proxy
@@ -36,6 +36,10 @@ export default defineNuxtConfig({
           : (process.env.NUXT_PUBLIC_GRAPHQL_BASE_URL || 'http://localhost:8000/graphql'),
         wsEndpoint: process.env.NUXT_PUBLIC_WS_BASE_URL || 'ws://localhost:8000/graphql',
         websocketsOnly: false,
+        tokenStorage: 'localStorage',
+        tokenName: 'authToken',
+        authType: 'Bearer',
+        authHeader: 'Authorization',
       }
     },
   },
@@ -55,4 +59,6 @@ export default defineNuxtConfig({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
     }
   },
+
+  compatibilityDate: '2025-01-15',
 })

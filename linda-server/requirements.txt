@@ -3,6 +3,7 @@ strawberry-graphql
 repository_sqlalchemy
 alembic==1.13.3
 psycopg2-binary~=2.9.5
-jwt
+PyJWT
+bcrypt
 python-dotenv
 pydantic-settings

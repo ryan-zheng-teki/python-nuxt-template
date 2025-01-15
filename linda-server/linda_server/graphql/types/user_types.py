@@ -13,6 +13,7 @@ class CreateUserInput:
     username: str
     email: str
     full_name: str
+    password: str  # Added password field
 
 @strawberry.input
 class UpdateUserInput:
@@ -20,6 +21,7 @@ class UpdateUserInput:
     username: Optional[str] = None
     email: Optional[str] = None
     full_name: Optional[str] = None
+    password: Optional[str] = None  # Added optional password field
 
 @strawberry.input
 class LoginInput:

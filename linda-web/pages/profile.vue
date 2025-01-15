@@ -30,6 +30,9 @@
           <p id="linkedinAddress" class="text-gray-900">{{ userStore.currentUser.linkedinAddress || 'Not provided' }}</p>
         </div>
       </div>
+      <div v-else-if="!userStore.loading && !userStore.error" class="text-center text-gray-600">
+        Please log in to view your profile
+      </div>
     </client-only>
   </div>
 </template>
@@ -43,6 +46,8 @@ import ErrorDisplay from '~/components/ErrorDisplay.vue'
 const userStore = useUserStore()
 
 onMounted(() => {
-  userStore.fetchCurrentUser()
+  if (userStore.currentUser?.id) {
+    userStore.fetchCurrentUser()
+  }
 })
 </script>

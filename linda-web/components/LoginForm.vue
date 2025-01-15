@@ -28,13 +28,15 @@
         <button 
           type="submit" 
           class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300 transform hover:scale-105"
+          :disabled="userStore.loading"
         >
-          Login
+          {{ userStore.loading ? 'Logging in...' : 'Login' }}
         </button>
         <button 
           type="button" 
           class="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition duration-300 transform hover:scale-105 mt-2"
           @click="handleSignUp"
+          :disabled="userStore.loading"
         >
           Sign Up
         </button>
@@ -58,12 +60,13 @@ const error = ref('')
 const userStore = useUserStore()
 
 const handleSubmit = async () => {
+  error.value = ''
   try {
-    await userStore.login(username.value, password.value)
-    if (userStore.isAuthenticated) {
-      // Optionally, emit a successful login event
+    const success = await userStore.login(username.value, password.value)
+    if (success) {
+      await navigateTo('/profile')
     } else {
-      error.value = userStore.error || 'Login failed.'
+      error.value = userStore.error || 'Login failed. Please check your credentials.'
     }
   } catch (err) {
     error.value = 'An unexpected error occurred.'
@@ -75,7 +78,3 @@ const handleSignUp = () => {
   emit('signup-request')
 }
 </script>
-
-<style scoped>
-/* Add any necessary styles here */
-</style>
