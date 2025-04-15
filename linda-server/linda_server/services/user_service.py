@@ -5,16 +5,17 @@ from linda_server.utils.password import hash_password, verify_password
 import jwt
 from datetime import datetime, timedelta
 import logging
+import os
 
 logger = logging.getLogger(__name__)
-
-SECRET_KEY = "your_secret_key"  # Replace with your actual secret key
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 class UserService:
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
+        # Get JWT settings from environment variables
+        self.secret_key = os.getenv("JWT_SECRET_KEY", "your_default_secret_key")
+        self.algorithm = os.getenv("JWT_ALGORITHM", "HS256")
+        self.access_token_expire_minutes = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
     def create_user(self, username: str, email: str, full_name: str, password: str) -> User:
         """
@@ -109,9 +110,9 @@ class UserService:
             Encoded JWT token string
         """
         to_encode = data.copy()
-        expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+        expire = datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=self.access_token_expire_minutes))
         to_encode.update({"exp": expire})
-        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
 
     def login(self, username: str, password: str) -> Tuple[Optional[str], Optional[User]]:
         """

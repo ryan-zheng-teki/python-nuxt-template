@@ -4,21 +4,25 @@ from strawberry.fastapi import GraphQLRouter
 from strawberry.subscriptions import GRAPHQL_TRANSPORT_WS_PROTOCOL, GRAPHQL_WS_PROTOCOL
 import jwt  # PyJWT library
 from datetime import datetime, timedelta
+import os
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Import your GraphQL schema and settings
+# Import your GraphQL schema
 from .graphql.schema import schema
-from .config.settings import settings
 
 app = FastAPI()
 
-# Configure CORS with "*" origin
+# Get CORS settings from environment
+cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000")
+cors_origins_list = cors_origins.split(",") if cors_origins else ["*"]
+
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins
+    allow_origins=cors_origins_list,
     allow_credentials=False,  # Must be False when using "*"
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,7 +32,11 @@ oauth2_scheme = None  # Not used anymore since we removed REST authentication
 
 def verify_token(token: str):
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        # Get JWT settings directly from environment
+        secret_key = os.getenv("JWT_SECRET_KEY", "your_default_secret_key")
+        algorithm = os.getenv("JWT_ALGORITHM", "HS256")
+        
+        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
         user_id: int = payload.get("sub")
         if user_id is None:
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
