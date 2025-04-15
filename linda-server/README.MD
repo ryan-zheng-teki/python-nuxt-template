@@ -21,7 +21,7 @@ docker run -d \
     -e POSTGRES_USER=postgres \
     -e POSTGRES_PASSWORD=mysecretpassword \
     -p 5432:5432 \
-    postgres:13
+    postgres:17
 ```
 
 This command will start a PostgreSQL 13 instance with the following configuration:

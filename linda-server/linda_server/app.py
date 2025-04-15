@@ -2,8 +2,6 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from strawberry.fastapi import GraphQLRouter
 from strawberry.subscriptions import GRAPHQL_TRANSPORT_WS_PROTOCOL, GRAPHQL_WS_PROTOCOL
-from fastapi.responses import FileResponse
-import os
 import jwt  # PyJWT library
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
@@ -65,26 +63,3 @@ graphql_router = GraphQLRouter(
 
 # Include GraphQL router
 app.include_router(graphql_router, prefix="/graphql")
-
-@app.get("/libraries/my_library/libmylibrary.so", name="download_library")
-async def download_library(request: Request):
-    """
-    Serves the C++ library file for download.
-    Only accessible to authenticated users.
-    """
-    user = getattr(request.state, "user", None)
-
-    if not user or not user.get("is_authenticated", False):
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    if not os.path.exists(settings.LIBRARY_PATH):
-        raise HTTPException(status_code=404, detail="Library not found")
-    
-    return FileResponse(
-        path=settings.LIBRARY_PATH,
-        filename="libmylibrary.so",
-        media_type='application/octet-stream'
-    )
-
-# Removed REST-based /token endpoint and related authentication helper functions since
-# authentication is now handled via GraphQL mutations.

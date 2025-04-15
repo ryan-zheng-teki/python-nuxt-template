@@ -2,8 +2,6 @@ import { defineStore } from 'pinia'
 import { useMutation, useQuery } from '@vue/apollo-composable'
 import { CreateUser, UpdateUser, DeleteUser, Login } from '~/graphql/mutations/user_mutations'
 import { GetUser, GetAllUsers } from '~/graphql/queries/user_queries'
-import { BuySubscription, CancelSubscription } from '~/graphql/mutations/subscription_mutations'
-import { GenerateApiKey } from '~/graphql/mutations/api_key_mutations'
 import type { 
   User,
   CreateUserMutation,
@@ -17,11 +15,7 @@ import type {
   GetUserQuery,
   GetUserQueryVariables,
   GetAllUsersQuery,
-  GetAllUsersQueryVariables,
-  BuySubscriptionMutation,
-  BuySubscriptionMutationVariables,
-  GenerateApiKeyMutation,
-  GenerateApiKeyMutationVariables
+  GetAllUsersQueryVariables
 } from '~/generated/graphql'
 
 interface UserState {
@@ -30,7 +24,6 @@ interface UserState {
   loading: boolean;
   error: string | null;
   authToken: string | null;
-  apiKey: string | null;
 }
 
 export const useUserStore = defineStore('user', {
@@ -40,7 +33,6 @@ export const useUserStore = defineStore('user', {
     loading: false,
     error: null,
     authToken: null,
-    apiKey: null,
   }),
 
   actions: {
@@ -57,7 +49,6 @@ export const useUserStore = defineStore('user', {
     logout() {
       this.clearAuthToken()
       this.currentUser = null
-      this.apiKey = null
     },
 
     async login(username: string, password: string): Promise<boolean> {
@@ -221,56 +212,6 @@ export const useUserStore = defineStore('user', {
         this.loading = false
         console.error('Error fetching users:', error)
       })
-    },
-
-    async buySubscription(planType: string, durationDays: number) {
-      if (!this.currentUser) {
-        this.error = 'User is not logged in.'
-        return
-      }
-      this.loading = true
-      this.error = null
-      const { mutate: buySubscriptionMutation } = useMutation<BuySubscriptionMutation, BuySubscriptionMutationVariables>(BuySubscription)
-      try {
-        const result = await buySubscriptionMutation({
-          userId: this.currentUser.id,
-          planType,
-          durationDays
-        })
-        if (!result.data?.buySubscription) {
-          this.error = 'Failed to buy subscription.'
-        }
-      } catch (error) {
-        this.error = error instanceof Error ? error.message : 'Error buying subscription'
-        console.error('buySubscription error:', error)
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async generateApiKey() {
-      if (!this.currentUser) {
-        this.error = 'User is not logged in.'
-        return
-      }
-      this.loading = true
-      this.error = null
-      const { mutate: generateApiKeyMutation } = useMutation<GenerateApiKeyMutation, GenerateApiKeyMutationVariables>(GenerateApiKey)
-      try {
-        const result = await generateApiKeyMutation({
-          userId: this.currentUser.id
-        })
-        if (result.data?.generateApiKey?.keyValue) {
-          this.apiKey = result.data.generateApiKey.keyValue
-        } else {
-          this.error = 'Failed to generate API key.'
-        }
-      } catch (error) {
-        this.error = error instanceof Error ? error.message : 'Error generating API key'
-        console.error('generateApiKey error:', error)
-      } finally {
-        this.loading = false
-      }
     }
   },
 
