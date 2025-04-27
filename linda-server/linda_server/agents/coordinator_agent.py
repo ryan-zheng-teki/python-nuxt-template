@@ -25,6 +25,7 @@ class GeometryProblemInput(BaseModel):
 
 with import_functions():
     from linda_server.functions.llm_chat import Message as LlmMessage, LlmChatInput, llm_chat
+    from linda_server.agents.prompts.coordinator_prompt import SYSTEM_PROMPT as COORDINATOR_SYSTEM_PROMPT
 
 @agent.defn()
 class CoordinatorAgent:
@@ -52,9 +53,8 @@ class CoordinatorAgent:
             problem_text = user_messages[0].content
             logger.info(f"Extracted problem text: {problem_text}")
             
-            system_content = "You are a coordinator for a geometry problem solving system. Given a geometry problem, analyze it step by step and explain the solution approach clearly."
             messages = [
-                LlmMessage(role="system", content=system_content),
+                LlmMessage(role="system", content=COORDINATOR_SYSTEM_PROMPT),
                 LlmMessage(role="user", content=problem_text)
             ]
             
@@ -83,9 +83,8 @@ class CoordinatorAgent:
         logger.info("Input payload: %s", input.json())
         self.status = "processing"
         try:
-            system_content = "You are a coordinator..."
             messages = [
-                LlmMessage(role="system", content=system_content),
+                LlmMessage(role="system", content=COORDINATOR_SYSTEM_PROMPT),
                 LlmMessage(role="user", content=input.problem_text)
             ]
             logger.info("Calling llm_chat for analysis (streaming)")

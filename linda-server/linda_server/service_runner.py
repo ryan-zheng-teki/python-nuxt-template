@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import sys
 import webbrowser
 from pathlib import Path
 
@@ -13,6 +14,8 @@ from linda_server.agents.math_master_agent import MathMasterAgent
 from linda_server.agents.animation_developer_agent import AnimationDeveloperAgent
 from linda_server.functions.llm_chat import llm_chat
 from linda_server.functions.file_storage import save_file
+from linda_server.functions.animation_services import save_animation_code
+from linda_server.utils.animation_server_runner import start_animation_server, get_animation_server_url
 
 from restack_ai import Restack
 from restack_ai.restack import CloudConnectionOptions, ServiceOptions
@@ -23,6 +26,22 @@ load_dotenv()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Check for mandatory ANIMATION_SERVER_PATH environment variable
+if "ANIMATION_SERVER_PATH" not in os.environ:
+    logger.error("ERROR: ANIMATION_SERVER_PATH environment variable is not set!")
+    logger.error("Please set the ANIMATION_SERVER_PATH environment variable to the absolute path of the animation server directory.")
+    logger.error("Example: export ANIMATION_SERVER_PATH=/Users/ryan-zheng/learning/autobyteus_org_workspace/python-nuxt-template/animation_server")
+    sys.exit(1)  # Exit with error code
+
+# Verify that the specified path exists
+animation_server_path = os.environ["ANIMATION_SERVER_PATH"]
+if not os.path.exists(animation_server_path):
+    logger.error(f"ERROR: The specified ANIMATION_SERVER_PATH does not exist: {animation_server_path}")
+    logger.error("Please set the correct path to the animation server directory.")
+    sys.exit(1)  # Exit with error code
+
+logger.info(f"Using ANIMATION_SERVER_PATH: {animation_server_path}")
 
 # Setup Restack client without validation
 engine_id = os.getenv("RESTACK_ENGINE_ID")
@@ -46,7 +65,7 @@ async def start_restack_services():
             agents=[CoordinatorAgent, MathMasterAgent, AnimationDeveloperAgent],
             # No workflows registered since workflows were removed
             workflows=[],
-            functions=[llm_chat, save_file],
+            functions=[llm_chat],  # Added our new function
             options=ServiceOptions(
                 max_concurrent_workflow_runs=10,
                 max_concurrent_function_runs=5
@@ -56,30 +75,12 @@ async def start_restack_services():
     except Exception as e:
         logger.error(f"Failed to start Restack services: {str(e)}")
 
-async def start_animation_server():
-    """Start the animation server"""
-    try:
-        animation_server_dir = os.path.join("python-nuxt-template", "animation_server")
-        if not os.path.exists(animation_server_dir):
-            logger.error(f"Animation server directory not found: {animation_server_dir}")
-            return
-
-        process = await asyncio.create_subprocess_shell(
-            f"cd {animation_server_dir} && yarn dev",
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            shell=True
-        )
-
-        logger.info(f"Animation server started on port 4000")
-        return process
-    except Exception as e:
-        logger.error(f"Failed to start animation server: {str(e)}")
-
 async def main():
     """Main entry point for the service"""
     try:
         await start_restack_services()
+        
+        # Start the animation server using the dedicated module
         animation_server = await start_animation_server()
 
         import uvicorn
@@ -106,6 +107,7 @@ def watch_services():
 
     webbrowser.open("http://localhost:8000/graphql")
     webbrowser.open("http://localhost:3000")
-    webbrowser.open("http://localhost:4000")
+    # Open the animation server URL using the function from the animation_server_runner module
+    webbrowser.open(get_animation_server_url())
 
     run_process(watch_path, recursive=True, target=run_services)
