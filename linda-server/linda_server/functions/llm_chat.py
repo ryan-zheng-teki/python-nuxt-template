@@ -10,7 +10,7 @@ from restack_ai.function import function, NonRetryableError, stream_to_websocket
 load_dotenv()
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 class Message(BaseModel):
     role: Literal["system", "user", "assistant"]
@@ -25,7 +25,7 @@ class LlmChatInput(BaseModel):
 @function.defn()
 async def llm_chat(function_input: LlmChatInput) -> str:
     logger.info("llm_chat invocation started")
-    logger.debug("LlmChatInput: %s", function_input.json())
+    logger.info("LlmChatInput: %s", function_input.json())
     try:
         api_key = os.environ.get("RESTACK_API_KEY") or os.environ.get("OPENAI_API_KEY")
         if not api_key:
@@ -36,11 +36,16 @@ async def llm_chat(function_input: LlmChatInput) -> str:
 
         model = function_input.model or "gpt-4.1-mini"
         logger.info("Calling OpenAI model=%s stream=%s", model, function_input.stream)
+
+        # Build messages payload
         messages_payload = []
         if function_input.system_content:
             messages_payload.append({"role": "system", "content": function_input.system_content})
         for m in function_input.messages:
             messages_payload.append(m.model_dump())
+
+        # Log the full outgoing payload for debugging
+        logger.info("Outgoing messages_payload: %s", messages_payload)
 
         response = client.chat.completions.create(
             model=model,
@@ -54,7 +59,7 @@ async def llm_chat(function_input: LlmChatInput) -> str:
             return await stream_to_websocket(api_address=api_address, data=response)
         else:
             result = response.choices[0].message.content
-            logger.debug("Received response: %s", result)
+            logger.info("Received response: %s", result)
             return result
 
     except Exception as e:

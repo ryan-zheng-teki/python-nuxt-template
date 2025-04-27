@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-slate-50">
+  <div class="flex flex-col min-h-screen bg-slate-100">
     <!-- Header removed entirely -->
     <main class="flex-grow container mx-auto px-4 py-6">
       <slot></slot>
@@ -20,7 +20,7 @@ html, body, #__nuxt, #__layout {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #f8fafc; /* slate-50 */
+  background-color: #f1f5f9; /* slate-100 */
 }
 
 body {

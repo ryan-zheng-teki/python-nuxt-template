@@ -1,21 +1,31 @@
 <template>
-  <NuxtLayout>
+  <div>
     <NuxtPage />
-  </NuxtLayout>
+  </div>
 </template>
 
-<style>
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background-color: #f8fafc; /* slate-50 */
-}
+<script setup>
+import { onMounted } from 'vue';
 
-#__nuxt {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background-color: #f8fafc;
-}
-</style>
+onMounted(() => {
+  // Load MathJax script for LaTeX rendering
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+  script.async = true;
+  script.id = 'MathJax-script';
+  document.head.appendChild(script);
+  
+  // Configure MathJax
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+});
+</script>
