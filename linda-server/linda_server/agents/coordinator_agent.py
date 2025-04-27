@@ -42,29 +42,28 @@ class CoordinatorAgent:
         """
         logger.info("Event messages started")
         logger.info(f"Messages payload: {messages_event.json()}")
-        
+
         self.status = "processing"
         try:
-            # Extract the problem text from the first user message
             user_messages = [m for m in messages_event.messages if m.role == "user"]
             if not user_messages:
                 raise ValueError("No user message found in the request")
-            
+
             problem_text = user_messages[0].content
             logger.info(f"Extracted problem text: {problem_text}")
-            
+
             messages = [
                 LlmMessage(role="system", content=COORDINATOR_SYSTEM_PROMPT),
                 LlmMessage(role="user", content=problem_text)
             ]
-            
+
             logger.info("Calling llm_chat for analysis (streaming)")
             stream_response = await agent.step(
                 function=llm_chat,
                 function_input=LlmChatInput(messages=messages, stream=True),
-                start_to_close_timeout=timedelta(seconds=600),
+                start_to_close_timeout=timedelta(seconds=600000),
             )
-            
+
             self.status = "complete"
             logger.info("messages event completed successfully")
             return stream_response
@@ -74,35 +73,10 @@ class CoordinatorAgent:
             raise NonRetryableError(f"Error in coordinator agent messages handler: {e}") from e
 
     @agent.event
-    async def submit_problem(self, input: GeometryProblemInput):
-        """
-        Legacy handler for non-streaming requests.
-        Kept for backward compatibility.
-        """
-        logger.info("Event submit_problem started")
-        logger.info("Input payload: %s", input.json())
-        self.status = "processing"
-        try:
-            messages = [
-                LlmMessage(role="system", content=COORDINATOR_SYSTEM_PROMPT),
-                LlmMessage(role="user", content=input.problem_text)
-            ]
-            logger.info("Calling llm_chat for analysis (streaming)")
-            stream_response = await agent.step(
-                function=llm_chat,
-                function_input=LlmChatInput(messages=messages, stream=True),
-                start_to_close_timeout=timedelta(seconds=120),
-            )
-            self.status = "complete"
-            logger.info("submit_problem completed successfully")
-            return stream_response
-        except Exception as e:
-            logger.exception("Error in submit_problem")
-            self.status = "error"
-            raise NonRetryableError(f"Error in coordinator agent: {e}") from e
-
-    @agent.event
     async def end(self, end: EndEvent) -> EndEvent:
+        """
+        Handle end event to terminate the run loop.
+        """
         logger.info("Event end received")
         logger.info("End payload: %s", end.json())
         self.end = True
@@ -110,6 +84,9 @@ class CoordinatorAgent:
 
     @agent.run
     async def run(self, function_input: Dict[str, Any]) -> None:
+        """
+        Run loop: stays alive until end event is received.
+        """
         logger.info("CoordinatorAgent run started")
         logger.info("Run input: %s", function_input)
         await agent.condition(lambda: self.end)

@@ -34,7 +34,7 @@ async def llm_chat(function_input: LlmChatInput) -> str:
         base_url = "https://ai.restack.io" if os.environ.get("RESTACK_API_KEY") else "https://api.openai.com/v1"
         client = OpenAI(base_url=base_url, api_key=api_key)
 
-        model = function_input.model or "gpt-4.1-mini"
+        model = function_input.model or "gpt-4.1"
         logger.info("Calling OpenAI model=%s stream=%s", model, function_input.stream)
 
         # Build messages payload
@@ -50,7 +50,8 @@ async def llm_chat(function_input: LlmChatInput) -> str:
         response = client.chat.completions.create(
             model=model,
             messages=messages_payload,
-            stream=function_input.stream
+            stream=function_input.stream,
+            timeout=6000000,
         )
 
         if function_input.stream:

@@ -71,7 +71,7 @@ export const useGeometrySolverStore = defineStore('geometrySolver', {
         console.log('Starting geometry solver agent...')
         
         // Make a direct API call to ensure correct URL
-        const resp = await fetch(`${API_BASE_URL}/api/agents/CoordinatorAgent`, {
+        const resp = await fetch(`${API_BASE_URL}/api/agents/MathMasterAgent`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -135,7 +135,7 @@ export const useGeometrySolverStore = defineStore('geometrySolver', {
 
       try {
         // Use the direct streaming URL
-        const url = `${STREAM_BASE_URL}/stream/agents/CoordinatorAgent/${this.agentId}/${this.runId}/chat/completions`
+        const url = `${STREAM_BASE_URL}/stream/agents/MathMasterAgent/${this.agentId}/${this.runId}/chat/completions`
         
         // Format the payload to match the MessagesEvent structure
         const body = {
