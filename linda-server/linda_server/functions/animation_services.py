@@ -5,6 +5,7 @@ import os
 import logging
 import sys
 from typing import List, Dict, Any
+from restack_ai.function import function, log, NonRetryableError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -12,6 +13,7 @@ logger.setLevel(logging.INFO)
 # Import the parser and file utilities here (outside workflow context)
 from linda_server.utils.animation_parser import parse_animation_code, save_animation_files
 
+@function.defn()
 async def save_animation_code(animation_code: str) -> Dict[str, Any]:
     """
     Save animation code to the animation server directory.

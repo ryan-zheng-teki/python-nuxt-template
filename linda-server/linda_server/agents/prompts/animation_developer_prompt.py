@@ -32,7 +32,7 @@ The animation will be integrated into an existing Nuxt.js application with the f
 **WORKFLOW:**
 You will receive a geometry problem and its step-by-step solution. Your task is to:
 1. Analyze the geometry problem and its solution steps
-2. Generate complete, production-ready TypeScript code for the animation
+2. Generate complete, production-ready code for the animation
 3. For each step of the solution, design a clear visual animation that illustrates the concept
 4. Use Three.js for 3D rendering and Tween.js for smooth animations
 

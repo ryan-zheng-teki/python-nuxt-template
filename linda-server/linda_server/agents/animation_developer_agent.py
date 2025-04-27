@@ -160,69 +160,8 @@ class AnimationDeveloperAgent:
             self.status = "error"
             raise NonRetryableError(f"Error in animation developer agent: {e}") from e
     
-    @agent.event
-    async def create_animation(self, input: AnimationInput) -> AnimationDeveloperResponse:
-        """
-        Legacy handler for create_animation event.
-        Kept for backward compatibility.
-        """
-        logger.info(f"Animation Developer received problem: {input.problem_text}")
-        logger.info("Input payload: %s", input.json())
-        self.status = "creating"
-        
-        try:
-            # Generate animation code directly (no separate plan step)
-            logger.info("Generating animation code")
-            code_messages = [
-                Message(role="system", content=ANIMATION_DEVELOPER_SYSTEM_PROMPT),
-                Message(role="user", content=f"""
-                Create animation code for this geometry problem:
-                
-                Problem: {input.problem_text}
-                
-                Solution steps:
-                {json.dumps(input.solution.steps, indent=2)}
-                
-                Final answer: {input.solution.final_answer}
-                """)
-            ]
-            
-            animation_code = await agent.step(
-                function=llm_chat,
-                function_input=LlmChatInput(messages=code_messages),
-                start_to_close_timeout=timedelta(seconds=240),
-            )
-            logger.info("Received animation code block")
-            
-            # Save the animation code to files using the service function
-            # This avoids accessing environment variables or file system from the workflow
-            logger.info("Calling service function to save animation code")
-            save_result = await agent.step(
-                function=save_animation_code,
-                function_input=animation_code,
-                start_to_close_timeout=timedelta(seconds=30),
-            )
-            
-            if not save_result["success"]:
-                logger.error(f"Failed to save animation code: {save_result['message']}")
-                raise ValueError(save_result["message"])
-                
-            logger.info(f"Animation code saved: {save_result['message']}")
-            
-            self.animation_code = animation_code
-            self.status = "complete"
-            logger.info("create_animation completed successfully")
-            
-            return AnimationDeveloperResponse(
-                status=self.status,
-                message="Animation created successfully",
-                animation_code=self.animation_code
-            )
-            
-        except Exception as e:
-            logger.exception("Error in create_animation")
-            self.status = "error"
-            raise NonRetryableError(f"Error in animation developer agent: {e}") from e
+    # The create_animation event handler has been removed as it's no longer needed
+    # We now use the messages event handler with the chat completions API instead
 
     @agent.run
     async def run(self, function_input: Dict[str, Any]) -> None:

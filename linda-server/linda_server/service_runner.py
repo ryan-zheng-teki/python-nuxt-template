@@ -65,7 +65,7 @@ async def start_restack_services():
             agents=[CoordinatorAgent, MathMasterAgent, AnimationDeveloperAgent],
             # No workflows registered since workflows were removed
             workflows=[],
-            functions=[llm_chat],  # Added our new function
+            functions=[llm_chat, save_animation_code, save_file],  # Added save_animation_code function
             options=ServiceOptions(
                 max_concurrent_workflow_runs=10,
                 max_concurrent_function_runs=5
@@ -78,10 +78,11 @@ async def start_restack_services():
 async def main():
     """Main entry point for the service"""
     try:
-        await start_restack_services()
-        
         # Start the animation server using the dedicated module
         animation_server = await start_animation_server()
+        
+        await start_restack_services()
+        
 
         import uvicorn
         config = uvicorn.Config(app, host="0.0.0.0", port=8000, log_level="info")

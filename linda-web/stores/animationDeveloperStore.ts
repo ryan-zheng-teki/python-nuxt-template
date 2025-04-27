@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 
 // Hardcoded URLs
 const API_BASE_URL = 'http://localhost:6233'
+const STREAM_BASE_URL = 'http://localhost:9233' // This URL should be used for the completion API
 const ANIMATION_SERVER_URL = 'http://localhost:4000'
 
 export const useAnimationDeveloperStore = defineStore('animationDeveloper', {
@@ -119,27 +120,42 @@ export const useAnimationDeveloperStore = defineStore('animationDeveloper', {
         
         console.log('Generating animation for problem:', problemText)
         
-        // Format the solution steps for the animation developer
-        const animationInput = {
-          problem_text: problemText,
-          solution: {
-            steps: Array.isArray(solution) ? solution : [solution],
-            final_answer: solution[0]?.final_answer || ""
-          }
-        }
+        // Format the solution steps and problem for the user message
+        let solutionSteps = Array.isArray(solution) ? solution : [solution];
+        const finalAnswer = solutionSteps[0]?.final_answer || "";
         
-        // Call the animation developer agent to create the animation
-        const url = `${API_BASE_URL}/api/agents/AnimationDeveloperAgent/${this.agentId}/${this.runId}/create_animation`
-        
-        console.log('Sending animation request to URL:', url)
-        console.log('Animation request payload:', animationInput)
+        // Create a formatted message that includes both problem and solution
+        // This follows the animation developer prompt expectations
+        const userMessage = `
+I need an animation for this geometry problem:
 
+Problem: ${problemText}
+
+Step-by-step solution:
+${solutionSteps[0]?.description || ""}
+
+${finalAnswer ? `Final Answer: ${finalAnswer}` : ""}
+`;
+        
+        // Call the completions API (non-streaming version) using the correct URL structure
+        const url = `${STREAM_BASE_URL}/stream/agents/AnimationDeveloperAgent/${this.agentId}/${this.runId}/chat/completions`
+        
+        console.log('Sending animation request to URL:', url);
+        
         const response = await fetch(url, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(animationInput)
+          body: JSON.stringify({
+            messages: [
+              {
+                role: "user",
+                content: userMessage
+              }
+            ],
+            stream: false // Not using streaming for animation developer
+          })
         })
         
         if (!response.ok) {
