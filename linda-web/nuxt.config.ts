@@ -10,11 +10,15 @@ export default defineNuxtConfig({
   nitro: {
     devProxy: {
       '/graphql': {
-        target: process.env.NUXT_PUBLIC_GRAPHQL_BASE_URL || 'http://localhost:8000/graphql',
+        target: 'http://localhost:8000/graphql',
         changeOrigin: true,
       },
-      '/rest': {
-        target: process.env.NUXT_PUBLIC_REST_BASE_URL || 'http://localhost:8000/rest',
+      '/api': {
+        target: 'http://localhost:6233',
+        changeOrigin: true,
+      },
+      '/stream': {
+        target: 'http://localhost:9233',
         changeOrigin: true,
       }
     }
@@ -22,9 +26,10 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      graphqlBaseUrl: process.env.NUXT_PUBLIC_GRAPHQL_BASE_URL || 'http://localhost:8000/graphql',
-      restBaseUrl: process.env.NUXT_PUBLIC_REST_BASE_URL || 'http://localhost:8000/rest',
-      wsBaseUrl: process.env.NUXT_PUBLIC_WS_BASE_URL || 'ws://localhost:8000/graphql',
+      graphqlBaseUrl: 'http://localhost:8000/graphql',
+      apiBaseUrl: 'http://localhost:6233',
+      streamBaseUrl: 'http://localhost:9233',
+      wsBaseUrl: 'ws://localhost:8000/graphql',
     }
   },
 
@@ -33,8 +38,8 @@ export default defineNuxtConfig({
       default: {
         httpEndpoint: process.env.NODE_ENV === 'development' 
           ? '/graphql'
-          : (process.env.NUXT_PUBLIC_GRAPHQL_BASE_URL || 'http://localhost:8000/graphql'),
-        wsEndpoint: process.env.NUXT_PUBLIC_WS_BASE_URL || 'ws://localhost:8000/graphql',
+          : 'http://localhost:8000/graphql',
+        wsEndpoint: 'ws://localhost:8000/graphql',
         websocketsOnly: false,
         tokenStorage: 'localStorage',
         tokenName: 'authToken',
@@ -43,6 +48,10 @@ export default defineNuxtConfig({
       }
     },
   },
+
+  css: [
+    '~/assets/css/main.css',
+  ],
 
   postcss: {
     plugins: {
@@ -53,12 +62,29 @@ export default defineNuxtConfig({
     },
   },
 
-  vite: {
-    assetsInclude: ['**/*.jpeg', '**/*.jpg', '**/*.png', '**/*.svg'],
-    define: {
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+  app: {
+    head: {
+      title: 'Restack Geometry Solver',
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { 
+          hid: 'description', 
+          name: 'description', 
+          content: 'Restack is an AI-powered learning platform specializing in geometry problem solving.' 
+        }
+      ]
     }
   },
 
-  compatibilityDate: '2025-01-15',
+  vite: {
+    assetsInclude: ['**/*.jpeg', '**/*.jpg', '**/*.png', '**/*.svg'],
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+      '__API_BASE_URL__': JSON.stringify('http://localhost:6233'),
+      '__STREAM_BASE_URL__': JSON.stringify('http://localhost:9233')
+    }
+  },
+
+  compatibilityDate: '2025-04-26',
 })

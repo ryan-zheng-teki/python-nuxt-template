@@ -1,80 +1,60 @@
 <template>
-  <div class="min-h-screen bg-blue-50 flex flex-col justify-center items-center p-4">
-    <form @submit.prevent="handleSubmit" class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-      <h2 class="text-xl font-semibold text-gray-800 mb-6">Please log in or sign up</h2>
-      <div class="space-y-4">
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-          <input
-            id="username"
-            v-model="username"
-            type="text"
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-            placeholder="Enter your username"
-          >
-        </div>
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-            placeholder="Enter your password"
-          >
-        </div>
-        <button 
-          type="submit" 
-          class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300 transform hover:scale-105"
-          :disabled="userStore.loading"
-        >
-          {{ userStore.loading ? 'Logging in...' : 'Login' }}
-        </button>
-        <button 
-          type="button" 
-          class="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition duration-300 transform hover:scale-105 mt-2"
-          @click="handleSignUp"
-          :disabled="userStore.loading"
-        >
-          Sign Up
-        </button>
-      </div>
-    </form>
-    <p class="mt-4 text-sm text-gray-600">Need help? <a href="#" class="text-blue-600 hover:underline">Contact support</a></p>
-    <p v-if="error" class="mt-4 text-red-600 bg-red-100 border border-red-400 rounded p-2">{{ error }}</p>
+  <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <h2 class="text-xl font-bold mb-4">Login to Restack</h2>
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="username">
+        Username
+      </label>
+      <input
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        id="username"
+        type="text"
+        placeholder="Username"
+        v-model="username"
+      />
+    </div>
+    <div class="mb-6">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+        Password
+      </label>
+      <input
+        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+        id="password"
+        type="password"
+        placeholder="******************"
+        v-model="password"
+      />
+    </div>
+    <div class="flex items-center justify-between">
+      <button
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        type="button"
+        @click="login"
+      >
+        Sign In
+      </button>
+      <button
+        class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+        @click="$emit('signup-request')"
+      >
+        Create Account
+      </button>
+    </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
-import { useUserStore } from '~/stores/user'
+<script setup>
+import { ref } from 'vue';
+import { useUserStore } from '~/stores/user';
 
-const emit = defineEmits(['login-error', 'signup-request'])
+const userStore = useUserStore();
 
-const username = ref('')
-const password = ref('')
-const error = ref('')
+const username = ref('');
+const password = ref('');
 
-const userStore = useUserStore()
+const login = async () => {
+  await userStore.login(username.value, password.value);
+};
 
-const handleSubmit = async () => {
-  error.value = ''
-  try {
-    const success = await userStore.login(username.value, password.value)
-    if (success) {
-      await navigateTo('/profile')
-    } else {
-      error.value = userStore.error || 'Login failed. Please check your credentials.'
-    }
-  } catch (err) {
-    error.value = 'An unexpected error occurred.'
-    console.error('Login error:', err)
-  }
-}
-
-const handleSignUp = () => {
-  emit('signup-request')
-}
+defineEmits(['signup-request']);
 </script>

@@ -1,6 +1,7 @@
 // /services/api.ts
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios from 'axios'
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 
 // Define a class to encapsulate Axios instance and related methods
 class ApiService {
@@ -14,7 +15,7 @@ class ApiService {
 
     // Set up request interceptors if needed
     this.axiosInstance.interceptors.request.use(
-      (config: AxiosRequestConfig) => {
+      (config: any) => {
         // For example, attach auth tokens here
         // const token = getAuthToken()
         // if (token) {
@@ -42,19 +43,22 @@ class ApiService {
   }
 
   // Generic GET request
-  public get<T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  public get<T = any>(url: string, config?: any): Promise<AxiosResponse<T>> {
     return this.axiosInstance.get<T>(url, config)
   }
 
   // Generic POST request
-  public post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  public post<T = any>(url: string, data?: any, config?: any): Promise<AxiosResponse<T>> {
     return this.axiosInstance.post<T>(url, data, config)
   }
 
   // Similarly, you can add put, delete, etc.
 }
 
+// Always use direct API URL in development for now
+const API_BASE_URL = 'http://localhost:6233'
+
 // Export a singleton instance
-const apiService = new ApiService(process.env.NUXT_PUBLIC_BACKEND_REST_URL || 'http://localhost:8000/rest')
+const apiService = new ApiService(API_BASE_URL)
 
 export default apiService

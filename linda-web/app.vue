@@ -1,17 +1,21 @@
 <template>
-  <div id="app">
-    <NuxtLayout>
-      <NuxtPage />
-    </NuxtLayout>
-  </div>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
 
-<style lang="css">
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
+<style>
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #f8fafc; /* slate-50 */
+}
 
-  #app {
-    @apply min-h-screen font-sans;
-  }
+#__nuxt {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+}
 </style>

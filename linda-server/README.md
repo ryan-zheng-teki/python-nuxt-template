@@ -1,6 +1,20 @@
 # Linda Server
 
-A simple authentication server template with login and signup functionality.
+A backend server providing geometry problem solving and animation generation capabilities through a GraphQL API.
+
+## Architecture
+
+This backend consists of multiple components:
+
+1. **Restack Engine** - Manages agents and workflows for solving geometry problems and generating animations
+2. **FastAPI Server** - Provides GraphQL API endpoints for client communication
+3. **Animation Server** - A Nuxt.js application rendering 3D animations for geometry problems
+
+## Prerequisites
+
+- Docker (for running Restack)
+- Python 3.10+
+- Node.js and Yarn (for the animation server)
 
 ## Environment Variables
 
@@ -22,25 +36,84 @@ DB_USER=your_db_user
 DB_PASSWORD=your_db_password
 DB_HOST=localhost
 DB_PORT=5432
+
+# Restack Settings
+RESTACK_ENGINE_ID=your_engine_id
+RESTACK_ENGINE_ADDRESS=your_engine_address
+RESTACK_ENGINE_API_KEY=your_api_key
+RESTACK_ENGINE_API_ADDRESS=your_api_address
 ```
 
 You can customize these values based on your specific needs.
 
 ## Running the Application
 
-1. Install dependencies:
-```
+**IMPORTANT**: Always use `main.py` to start the application. This will start all required components:
+- The Restack services
+- The FastAPI GraphQL server  
+- The animation server
+
+### Installation
+
+```bash
+cd python-nuxt-template/linda-server
 pip install -r requirements.txt
 ```
 
-2. Start the server:
+### Starting the Application
+
+There are two modes for running the application:
+
+#### Regular Mode
+
+```bash
+cd python-nuxt-template/linda-server
+python main.py
 ```
-uvicorn linda_server.app:app --reload
+
+#### Watch Mode (development)
+
+Watch mode automatically reloads when files change and opens browser tabs for all services:
+
+```bash
+cd python-nuxt-template/linda-server
+python main.py --watch
 ```
 
-The application will be available at http://localhost:8000.
-
-## API Documentation
-
-- GraphQL endpoint: http://localhost:8000/graphql
+This will automatically open:
 - GraphQL playground: http://localhost:8000/graphql
+- Main frontend: http://localhost:3000  
+- Animation server: http://localhost:4000
+
+## Component Details
+
+### Restack
+
+Restack orchestrates the AI agents and workflows. It runs in a Docker container with the following ports:
+
+```
+0.0.0.0:5233->5233/tcp
+0.0.0.0:6233->6233/tcp
+0.0.0.0:7233->7233/tcp
+0.0.0.0:9233->9233/tcp
+```
+
+### FastAPI GraphQL Server
+
+The GraphQL server runs on:
+- Endpoint: http://localhost:8000/graphql
+- Playground: http://localhost:8000/graphql
+
+### Animation Server
+
+The animation server is a Nuxt.js application using TypeScript, Three.js, and Tween.js. It's automatically started when you run `main.py` and available at:
+- http://localhost:4000
+
+## IMPORTANT: Don't start components individually
+
+Do not start components individually using commands like:
+```
+uvicorn linda_server.app:app --reload  # Don't use this
+```
+
+This would only start the FastAPI server without the other necessary components.

@@ -5,34 +5,34 @@
             "name": "Run Linda Server",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/main.py",
+            "program": "${workspaceFolder}/linda-server/main.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             },
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/linda-server",
             "purpose": ["debug-in-terminal"]
         },
         {
             "name": "Run Linda Server (Watch Mode)",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/main.py",
+            "program": "${workspaceFolder}/linda-server/main.py",
             "args": ["--watch"],
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             },
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/linda-server",
             "purpose": ["debug-in-terminal"]
         },
         {
             "name": "Animation Server Only",
             "type": "node",
             "request": "launch",
-            "cwd": "${workspaceFolder}/../animation_server",
+            "cwd": "${workspaceFolder}/animation_server",
             "runtimeExecutable": "yarn",
             "runtimeArgs": ["dev"],
             "sourceMaps": true,
